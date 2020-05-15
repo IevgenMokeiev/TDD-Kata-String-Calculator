@@ -106,6 +106,11 @@ class StringCalculatorAppTests: XCTestCase {
         expect(numbers: "//[*][%]\n1*2%3", result: 6)
     }
 
+    // MARK: - 9.
+    func test_multiple_delimeters_any_length_allowed() {
+        expect(numbers: "//[**][%]\n1**2%3", result: 6)
+    }
+
     // MARK: - Private
     private func expect(numbers: String, result: Int, file: StaticString = #file, line: UInt = #line) {
         XCTAssertTrue(try StringCalculator().add(numbers: numbers) == result, file: file, line: line)
