@@ -29,7 +29,7 @@ class StringCalculator {
 
         let result = components.reduce((number: 0, message: [String]())) {
             let integer = Int($1) ?? 0
-            return ($0.number + integer, integer < 0 ? $0.message + [$1] : $0.message)
+            return (integer > 1000 ? $0.number : $0.number + integer, integer < 0 ? $0.message + [$1] : $0.message)
         }
 
         if result.message.count > 0 {
@@ -60,21 +60,17 @@ class StringCalculatorAppTests: XCTestCase {
         expect(numbers: "", result: 0)
     }
 
-    func test_1_number_string() {
+    func test_1_2_numbers_string() {
         expect(numbers: "1", result: 1)
-    }
-
-    func test_2_numbers_string() {
         expect(numbers: "1,2", result: 3)
     }
 
     //2.
-    func test_3_numbers_string() {
+    func test_several_numbers_string() {
         expect(numbers: "1,2,4", result: 7)
-    }
-
-    func test_5_numbers_string() {
+        expect(numbers: "1,2,4,6", result: 13)
         expect(numbers: "1,2,4,6,4", result: 17)
+        expect(numbers: "1,2,4,6,4,1000", result: 1017)
     }
 
     //3.
@@ -90,15 +86,15 @@ class StringCalculatorAppTests: XCTestCase {
     }
 
     //5.
-    func test_exception_for_negative_number() {
-        expectThrows(numbers: "//;\n-1;2", errorMessage: "negatives not allowed: -1")
-    }
-
     func test_exception_for_negative_numbers() {
+        expectThrows(numbers: "//;\n-1;2", errorMessage: "negatives not allowed: -1")
         expectThrows(numbers: "//;\n-1;-2", errorMessage: "negatives not allowed: -1, -2")
     }
 
     //6.
+    func test_bigger_than_1000_igmored() {
+        expect(numbers: "1\n2,4\n6,1001", result: 13)
+    }
 
     //MARK: - Private
     private func expect(numbers: String, result: Int, file: StaticString = #file, line: UInt = #line) {
