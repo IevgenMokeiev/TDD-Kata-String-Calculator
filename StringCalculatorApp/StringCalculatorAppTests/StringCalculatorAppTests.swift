@@ -55,7 +55,7 @@ class StringCalculator {
 
 class StringCalculatorAppTests: XCTestCase {
 
-    //1.
+    // MARK: - 1.
     func test_0_empty_string() {
         expect(numbers: "", result: 0)
     }
@@ -65,7 +65,7 @@ class StringCalculatorAppTests: XCTestCase {
         expect(numbers: "1,2", result: 3)
     }
 
-    //2.
+    // MARK: - 2.
     func test_several_numbers_string() {
         expect(numbers: "1,2,4", result: 7)
         expect(numbers: "1,2,4,6", result: 13)
@@ -73,35 +73,40 @@ class StringCalculatorAppTests: XCTestCase {
         expect(numbers: "1,2,4,6,4,1000", result: 1017)
     }
 
-    //3.
+    // MARK: - 3.
     func test_newline_separator() {
         expect(numbers: "1\n2,4\n6,4", result: 17)
     }
 
-    //4.
+    // MARK: - 4.
     func test_different_delimeters() {
         expect(numbers: "//;\n1;2", result: 3)
         expect(numbers: "//e\n1e2", result: 3)
         expect(numbers: "//`\n1`2`4", result: 7)
     }
 
-    //5.
+    // MARK: - 5.
     func test_exception_for_negative_numbers() {
         expectThrows(numbers: "//;\n-1;2", errorMessage: "negatives not allowed: -1")
         expectThrows(numbers: "//;\n-1;-2", errorMessage: "negatives not allowed: -1, -2")
     }
 
-    //6.
+    // MARK: - 6.
     func test_bigger_than_1000_igmored() {
         expect(numbers: "1\n2,4\n6,1001", result: 13)
     }
 
-    //7.
-    func test_delimeter_any_length() {
+    // MARK: - 7.
+    func test_delimeter_any_length_allowed() {
         expect(numbers: "//[***]\n1***2***3", result: 6)
     }
 
-    //MARK: - Private
+    // MARK: - 8.
+    func test_multiple_delimeters_allowed() {
+        expect(numbers: "//[*][%]\n1*2%3", result: 6)
+    }
+
+    // MARK: - Private
     private func expect(numbers: String, result: Int, file: StaticString = #file, line: UInt = #line) {
         XCTAssertTrue(try StringCalculator().add(numbers: numbers) == result, file: file, line: line)
     }
