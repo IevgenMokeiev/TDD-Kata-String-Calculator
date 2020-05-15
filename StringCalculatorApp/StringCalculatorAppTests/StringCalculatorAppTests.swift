@@ -27,25 +27,17 @@ class StringCalculator {
     func sum(numbers: String, delimeterSet: CharacterSet) throws -> Int {
         let components = numbers.components(separatedBy: delimeterSet)
 
-        var result = 0
-        let startMessage = "negatives not allowed: "
-        var exceptionArray: [String] = []
-
-        components.forEach { string in
-            let integer = Int(string) ?? 0
-            if integer < 0 {
-                exceptionArray.append(string)
-            } else {
-                result += integer
-            }
+        let result = components.reduce((number: 0, message: [String]())) {
+            let integer = Int($1) ?? 0
+            return ($0.number + integer, integer < 0 ? $0.message + [$1] : $0.message)
         }
 
-        if exceptionArray.count > 0 {
-            let detailMessage = exceptionArray.joined(separator: ", ")
-            throw StringCalculatorError.negativeError(startMessage + detailMessage)
+        if result.message.count > 0 {
+            let detailMessage = result.message.joined(separator: ", ")
+            throw StringCalculatorError.negativeError("negatives not allowed: " + detailMessage)
         }
 
-        return result
+        return result.number
     }
 
     func parseDelimeter(numbers: String) -> (formattedString: String, delimeter: String?) {
