@@ -9,29 +9,46 @@
 import XCTest
 @testable import StringCalculatorApp
 
+enum StringCalculatorError: Error {
+    case negativeError(String)
+}
+
 class StringCalculator {
-    func add(numbers: String) -> Int {
-        let (delimeter, formattedString) = parseDelimeter(numbers: numbers)
+    func add(numbers: String) throws -> Int  {
+        let (formattedString, delimeter) = parseDelimeter(numbers: numbers)
 
         if let delimeter = delimeter {
-            let components = formattedString.components(separatedBy: delimeter)
-            return components.reduce(0) { $0 + (Int($1) ?? 0) }
+            return try sum(numbers: formattedString, delimeterSet: CharacterSet(charactersIn: delimeter))
         } else {
-            let components = formattedString.components(separatedBy: [",", "\n"])
-            return components.reduce(0) { $0 + (Int($1) ?? 0) }
+            return try sum(numbers: formattedString, delimeterSet: [",", "\n"])
         }
     }
 
-    func parseDelimeter(numbers: String) -> (delimeter: String?, formattedString: String) {
+    func sum(numbers: String, delimeterSet: CharacterSet) throws -> Int {
+        let components = numbers.components(separatedBy: delimeterSet)
+        return try components.reduce(0) { $0 + (try convertToInt(string: $1)) }
+    }
+
+    func convertToInt(string: String) throws -> Int {
+        let integer = Int(string) ?? 0
+
+        if integer < 0 {
+            throw StringCalculatorError.negativeError("negatives not allowed: \(integer)")
+        }
+
+        return integer
+    }
+
+    func parseDelimeter(numbers: String) -> (formattedString: String, delimeter: String?) {
 
         if let firstComponent = numbers.split(separator: "\n").first, firstComponent.starts(with: "//") {
             let delimeter = String(firstComponent.dropFirst(2))
             let components = numbers.split(separator: "\n").dropFirst()
             let formattedString = components.joined()
-            return (delimeter, formattedString)
+            return (formattedString, delimeter)
         }
 
-        return (nil, numbers)
+        return (numbers, nil)
     }
 }
 
@@ -71,8 +88,27 @@ class StringCalculatorAppTests: XCTestCase {
         expect(numbers: "//`\n1`2`4", result: 7)
     }
 
+    //5.
+    func test_exception_for_negative_number() {
+        expectThrows(numbers: "//;\n-1;2", errorMessage: "negatives not allowed: -1")
+    }
+
+    func test_exception_for_negative_numbers() {
+        expectThrows(numbers: "//;\n-1;-2", errorMessage: "negatives not allowed: -1, -2")
+    }
+
     //MARK: - Private
     private func expect(numbers: String, result: Int, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertTrue(StringCalculator().add(numbers: numbers) == result, file: file, line: line)
+        XCTAssertTrue(try StringCalculator().add(numbers: numbers) == result, file: file, line: line)
+    }
+
+    private func expectThrows(numbers: String, errorMessage: String, file: StaticString = #file, line: UInt = #line) {
+        XCTAssertThrowsError(try StringCalculator().add(numbers: numbers), file: file, line: line) { error in
+            guard case StringCalculatorError.negativeError(let message) = error else {
+                return XCTFail("wrong error")
+            }
+
+            XCTAssertTrue(message == errorMessage, file: file, line: line)
+        }
     }
 }
