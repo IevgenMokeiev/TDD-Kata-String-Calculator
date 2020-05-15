@@ -11,8 +11,27 @@ import XCTest
 
 class StringCalculator {
     func add(numbers: String) -> Int {
-        let components = numbers.components(separatedBy: [",", "\n"])
-        return components.reduce(0) { $0 + (Int($1) ?? 0) }
+        let (delimeter, formattedString) = parseDelimeter(numbers: numbers)
+
+        if let delimeter = delimeter {
+            let components = formattedString.components(separatedBy: delimeter)
+            return components.reduce(0) { $0 + (Int($1) ?? 0) }
+        } else {
+            let components = formattedString.components(separatedBy: [",", "\n"])
+            return components.reduce(0) { $0 + (Int($1) ?? 0) }
+        }
+    }
+
+    func parseDelimeter(numbers: String) -> (delimeter: String?, formattedString: String) {
+
+        if let firstComponent = numbers.split(separator: "\n").first, firstComponent.starts(with: "//") {
+            let delimeter = String(firstComponent.dropFirst(2))
+            let components = numbers.split(separator: "\n").dropFirst()
+            let formattedString = components.joined()
+            return (delimeter, formattedString)
+        }
+
+        return (nil, numbers)
     }
 }
 
@@ -45,8 +64,14 @@ class StringCalculatorAppTests: XCTestCase {
         expect(numbers: "1\n2,4\n6,4", result: 17)
     }
 
-    //MARK: - Private
+    //4.
+    func test_different_delimeters() {
+        expect(numbers: "//;\n1;2", result: 3)
+        expect(numbers: "//e\n1e2", result: 3)
+        expect(numbers: "//`\n1`2`4", result: 7)
+    }
 
+    //MARK: - Private
     private func expect(numbers: String, result: Int, file: StaticString = #file, line: UInt = #line) {
         XCTAssertTrue(StringCalculator().add(numbers: numbers) == result, file: file, line: line)
     }
