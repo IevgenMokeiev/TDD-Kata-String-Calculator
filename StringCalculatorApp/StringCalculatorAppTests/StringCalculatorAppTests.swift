@@ -26,17 +26,26 @@ class StringCalculator {
 
     func sum(numbers: String, delimeterSet: CharacterSet) throws -> Int {
         let components = numbers.components(separatedBy: delimeterSet)
-        return try components.reduce(0) { $0 + (try convertToInt(string: $1)) }
-    }
 
-    func convertToInt(string: String) throws -> Int {
-        let integer = Int(string) ?? 0
+        var result = 0
+        let startMessage = "negatives not allowed: "
+        var exceptionArray: [String] = []
 
-        if integer < 0 {
-            throw StringCalculatorError.negativeError("negatives not allowed: \(integer)")
+        components.forEach { string in
+            let integer = Int(string) ?? 0
+            if integer < 0 {
+                exceptionArray.append(string)
+            } else {
+                result += integer
+            }
         }
 
-        return integer
+        if exceptionArray.count > 0 {
+            let detailMessage = exceptionArray.joined(separator: ", ")
+            throw StringCalculatorError.negativeError(startMessage + detailMessage)
+        }
+
+        return result
     }
 
     func parseDelimeter(numbers: String) -> (formattedString: String, delimeter: String?) {
@@ -54,7 +63,7 @@ class StringCalculator {
 
 class StringCalculatorAppTests: XCTestCase {
 
-    // 1.
+    //1.
     func test_0_empty_string() {
         expect(numbers: "", result: 0)
     }
@@ -67,7 +76,7 @@ class StringCalculatorAppTests: XCTestCase {
         expect(numbers: "1,2", result: 3)
     }
 
-    // 2.
+    //2.
     func test_3_numbers_string() {
         expect(numbers: "1,2,4", result: 7)
     }
@@ -76,7 +85,7 @@ class StringCalculatorAppTests: XCTestCase {
         expect(numbers: "1,2,4,6,4", result: 17)
     }
 
-    // 3.
+    //3.
     func test_newline_separator() {
         expect(numbers: "1\n2,4\n6,4", result: 17)
     }
@@ -97,6 +106,8 @@ class StringCalculatorAppTests: XCTestCase {
         expectThrows(numbers: "//;\n-1;-2", errorMessage: "negatives not allowed: -1, -2")
     }
 
+    //6.
+
     //MARK: - Private
     private func expect(numbers: String, result: Int, file: StaticString = #file, line: UInt = #line) {
         XCTAssertTrue(try StringCalculator().add(numbers: numbers) == result, file: file, line: line)
@@ -108,7 +119,7 @@ class StringCalculatorAppTests: XCTestCase {
                 return XCTFail("wrong error")
             }
 
-            XCTAssertTrue(message == errorMessage, file: file, line: line)
+            XCTAssertTrue(message == errorMessage, message, file: file, line: line)
         }
     }
 }
