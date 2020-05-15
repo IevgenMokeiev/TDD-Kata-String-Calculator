@@ -18,7 +18,8 @@ class StringCalculator {
 
 class StringCalculatorAppTests: XCTestCase {
 
-    func test0empty_string() {
+    // 1.
+    func test_0_empty_string() {
         XCTAssertTrue(makeSUT().add(numbers: "") == 0)
     }
 
@@ -26,9 +27,20 @@ class StringCalculatorAppTests: XCTestCase {
         XCTAssertTrue(makeSUT().add(numbers: "1") == 1)
     }
 
-    func test_2_number_string() {
+    func test_2_numbers_string() {
         XCTAssertTrue(makeSUT().add(numbers: "1,2") == 3)
     }
+
+    // 2.
+    func test_3_numbers_string() {
+         XCTAssertTrue(makeSUT().add(numbers: "1,2,4") == 7)
+    }
+
+    func test_5_numbers_string() {
+         XCTAssertTrue(makeSUT().add(numbers: "1,2,4,6,4") == 17)
+    }
+
+    // 3.
 
     func makeSUT() -> StringCalculator {
         return StringCalculator()
